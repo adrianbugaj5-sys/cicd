@@ -8,9 +8,18 @@ services:
     tty: true
     ports:
       - "8080:8080"
+    environment:
+      REDIS_HOST: redis
+    depends_on:
+      - redis
     volumes:
       - .:/app                              # live mount – zmiany w src/ od razu widoczne
       - vendor:/app/vendor                  # vendor z obrazu, nie nadpisywany hostem
+    networks:
+      - task-manager-net
+
+  redis:
+    image: redis:7-alpine
     networks:
       - task-manager-net
 
