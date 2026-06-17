@@ -46,7 +46,7 @@ class RedisTaskRepository implements TaskRepositoryInterface
         }
 
         $d = json_decode($json, true);
-        return Task::reconstruct($d['id'], $d['title'], $d['completed'], Priority::from($d['priority']));
+        return Task::reconstruct($d['id'], $d['title'], $d['completed'], Priority::tryFrom($d['priority'] ?? '') ?? Priority::Medium);
     }
 
     public function findAll(): array
@@ -59,7 +59,7 @@ class RedisTaskRepository implements TaskRepositoryInterface
         $tasks = [];
         foreach ($keys as $key) {
             $d = json_decode($this->redis->get($key), true);
-            $tasks[$d['id']] = Task::reconstruct($d['id'], $d['title'], $d['completed'], Priority::from($d['priority']));
+            $tasks[$d['id']] = Task::reconstruct($d['id'], $d['title'], $d['completed'], Priority::tryFrom($d['priority'] ?? '') ?? Priority::Medium);
         }
 
         ksort($tasks);
