@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: PHP ${{ matrix.php }} – testy
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        php: [ '8.2', '8.3' ]   # sprawdzamy na dwóch wersjach PHP
+
+    steps:
+      - name: Checkout kodu
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: xdebug
+
+      - name: Cache vendor
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ matrix.php }}-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-${{ matrix.php }}-
+
+      - name: Instalacja zależności
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Uruchom testy
+        run: vendor/bin/phpunit --testdox
