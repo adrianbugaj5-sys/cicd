@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit;
 
+use App\Model\Priority;
 use App\Model\Task;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
@@ -69,5 +70,27 @@ class TaskTest extends TestCase
 
         self::assertSame(1, $first->getId());
         self::assertSame(2, $second->getId());
+    }
+
+    public function testDefaultPriorityIsMedium(): void
+    {
+        $task = new Task('Some task');
+
+        self::assertSame(Priority::Medium, $task->getPriority());
+    }
+
+    public function testCreateTaskWithHighPriority(): void
+    {
+        $task = new Task('Urgent task', Priority::High);
+
+        self::assertSame(Priority::High, $task->getPriority());
+    }
+
+    public function testChangePriority(): void
+    {
+        $task = new Task('Some task');
+        $task->changePriority(Priority::Low);
+
+        self::assertSame(Priority::Low, $task->getPriority());
     }
 }

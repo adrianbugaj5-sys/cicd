@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit;
 
+use App\Model\Priority;
 use App\Model\Task;
 use App\Repository\InMemoryTaskRepository;
 use App\Service\TaskService;
@@ -97,5 +98,27 @@ class TaskServiceTest extends TestCase
 
         self::assertCount(1, $completed);
         self::assertSame($t1->getId(), $completed[0]->getId());
+    }
+
+    public function testCreateTaskWithPriority(): void
+    {
+        $task = $this->service->createTask('Urgent', Priority::High);
+
+        self::assertSame(Priority::High, $task->getPriority());
+    }
+
+    public function testChangeTaskPriority(): void
+    {
+        $task = $this->service->createTask('Some task');
+        $this->service->changeTaskPriority($task->getId(), Priority::Low);
+
+        self::assertSame(Priority::Low, $task->getPriority());
+    }
+
+    public function testChangePriorityOnUnknownTaskThrows(): void
+    {
+        $this->expectException(RuntimeException::class);
+
+        $this->service->changeTaskPriority(999, Priority::High);
     }
 }
