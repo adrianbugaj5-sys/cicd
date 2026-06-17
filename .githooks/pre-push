@@ -1,0 +1,10 @@
+#!/bin/sh
+echo "Uruchamiam testy przed pushem..."
+
+docker compose run --rm php ./vendor/bin/phpunit --colors=always
+
+if [ $? -ne 0 ]; then
+    echo ""
+    echo "Testy nie przeszły. Push zablokowany."
+    exit 1
+fi
