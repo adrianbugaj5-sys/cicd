@@ -54,9 +54,19 @@ class Task
         $this->title = trim($title);
     }
 
-    // Resets the auto-increment counter — useful in tests.
-    public static function resetIdCounter(): void
+    public static function reconstruct(int $id, string $title, bool $completed): self
     {
-        self::$nextId = 1;
+        $task = new self($title);
+        $task->id = $id;
+        $task->completed = $completed;
+        if ($id >= self::$nextId) {
+            self::$nextId = $id + 1;
+        }
+        return $task;
+    }
+
+    public static function resetIdCounter(int $startFrom = 1): void
+    {
+        self::$nextId = $startFrom;
     }
 }

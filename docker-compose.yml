@@ -1,0 +1,22 @@
+name: task-manager   # izolowana nazwa projektu – nie koliduje z akson-*
+
+services:
+  php:
+    build: .
+    command: php -S 0.0.0.0:8080 -t public/
+    stdin_open: true
+    tty: true
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/app                              # live mount – zmiany w src/ od razu widoczne
+      - vendor:/app/vendor                  # vendor z obrazu, nie nadpisywany hostem
+    networks:
+      - task-manager-net
+
+networks:
+  task-manager-net:
+    driver: bridge
+
+volumes:
+  vendor:
