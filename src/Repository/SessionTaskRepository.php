@@ -43,7 +43,7 @@ class SessionTaskRepository implements TaskRepositoryInterface
     public function findAll(): array
     {
         return array_map(
-            fn(array $d) => Task::reconstruct($d['id'], $d['title'], $d['completed']),
+            fn (array $d) => Task::reconstruct($d['id'], $d['title'], $d['completed']),
             $_SESSION[self::KEY]
         );
     }

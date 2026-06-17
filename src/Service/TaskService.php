@@ -10,7 +10,9 @@ use RuntimeException;
 
 class TaskService
 {
-    public function __construct(private readonly TaskRepositoryInterface $repository) {}
+    public function __construct(private readonly TaskRepositoryInterface $repository)
+    {
+    }
 
     public function createTask(string $title): Task
     {
@@ -46,7 +48,7 @@ class TaskService
     public function listPending(): array
     {
         return array_values(
-            array_filter($this->repository->findAll(), fn(Task $t) => !$t->isCompleted())
+            array_filter($this->repository->findAll(), fn (Task $t) => !$t->isCompleted())
         );
     }
 
@@ -54,7 +56,7 @@ class TaskService
     public function listCompleted(): array
     {
         return array_values(
-            array_filter($this->repository->findAll(), fn(Task $t) => $t->isCompleted())
+            array_filter($this->repository->findAll(), fn (Task $t) => $t->isCompleted())
         );
     }
 

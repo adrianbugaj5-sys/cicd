@@ -37,3 +37,12 @@ jobs:
 
       - name: Uruchom testy
         run: vendor/bin/phpunit --testdox
+
+      - name: PHPStan
+        run: vendor/bin/phpstan analyse
+
+      - name: Code style
+        run: vendor/bin/php-cs-fixer check --diff
+
+      - name: Security audit
+        run: composer audit
