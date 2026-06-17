@@ -13,16 +13,18 @@ class Task
     private int $id;
     private string $title;
     private bool $completed;
+    private Priority $priority;
 
-    public function __construct(string $title)
+    public function __construct(string $title, Priority $priority = Priority::Medium)
     {
         if (trim($title) === '') {
             throw new InvalidArgumentException('Task title cannot be empty.');
         }
 
-        $this->id = self::$nextId++;
-        $this->title = trim($title);
+        $this->id        = self::$nextId++;
+        $this->title     = trim($title);
         $this->completed = false;
+        $this->priority  = $priority;
     }
 
     public function getId(): int
@@ -40,6 +42,11 @@ class Task
         return $this->completed;
     }
 
+    public function getPriority(): Priority
+    {
+        return $this->priority;
+    }
+
     public function complete(): void
     {
         $this->completed = true;
@@ -54,10 +61,15 @@ class Task
         $this->title = trim($title);
     }
 
-    public static function reconstruct(int $id, string $title, bool $completed): self
+    public function changePriority(Priority $priority): void
     {
-        $task = new self($title);
-        $task->id = $id;
+        $this->priority = $priority;
+    }
+
+    public static function reconstruct(int $id, string $title, bool $completed, Priority $priority = Priority::Medium): self
+    {
+        $task = new self($title, $priority);
+        $task->id        = $id;
         $task->completed = $completed;
         if ($id >= self::$nextId) {
             self::$nextId = $id + 1;

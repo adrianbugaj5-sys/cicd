@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+use App\Model\Priority;
 use App\Model\Task;
 
 class SessionTaskRepository implements TaskRepositoryInterface
@@ -20,7 +21,6 @@ class SessionTaskRepository implements TaskRepositoryInterface
             $_SESSION[self::KEY] = [];
         }
 
-        // Sync the static ID counter with the highest stored ID
         $ids = array_column($_SESSION[self::KEY], 'id');
         Task::resetIdCounter($ids ? max($ids) + 1 : 1);
     }
@@ -31,19 +31,20 @@ class SessionTaskRepository implements TaskRepositoryInterface
             'id'        => $task->getId(),
             'title'     => $task->getTitle(),
             'completed' => $task->isCompleted(),
+            'priority'  => $task->getPriority()->value,
         ];
     }
 
     public function findById(int $id): ?Task
     {
         $d = $_SESSION[self::KEY][$id] ?? null;
-        return $d ? Task::reconstruct($d['id'], $d['title'], $d['completed']) : null;
+        return $d ? Task::reconstruct($d['id'], $d['title'], $d['completed'], Priority::from($d['priority'])) : null;
     }
 
     public function findAll(): array
     {
         return array_map(
-            fn (array $d) => Task::reconstruct($d['id'], $d['title'], $d['completed']),
+            fn (array $d) => Task::reconstruct($d['id'], $d['title'], $d['completed'], Priority::from($d['priority'])),
             $_SESSION[self::KEY]
         );
     }
