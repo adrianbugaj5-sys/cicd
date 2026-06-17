@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
+use App\Model\Priority;
 use App\Repository\SessionTaskRepository;
 use App\Service\TaskService;
 
@@ -18,11 +19,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
     try {
+        $priority = Priority::tryFrom($_POST['priority'] ?? '') ?? Priority::Medium;
         match ($action) {
-            'add'      => $service->createTask($title),
+            'add'      => $service->createTask($title, $priority),
             'complete' => $service->completeTask($id),
             'delete'   => $service->deleteTask($id),
             'rename'   => $service->renameTask($id, $title),
+            'priority' => $service->changeTaskPriority($id, $priority),
             default    => null,
         };
     } catch (Throwable) {
@@ -182,6 +185,31 @@ $completed = $service->listCompleted();
             border-radius: 10px;
         }
 
+        .priority-badge {
+            font-size: .7rem;
+            font-weight: 700;
+            padding: .15rem .45rem;
+            border-radius: 99px;
+            flex-shrink: 0;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+        .priority-high   { background: #fee2e2; color: #b91c1c; }
+        .priority-medium { background: #fef9c3; color: #854d0e; }
+        .priority-low    { background: #dcfce7; color: #166534; }
+
+        select.priority-select {
+            border: none;
+            background: transparent;
+            font-size: .7rem;
+            font-weight: 700;
+            cursor: pointer;
+            padding: .15rem .3rem;
+            border-radius: 99px;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+
         .counter {
             display: inline-flex;
             align-items: center;
@@ -208,6 +236,13 @@ $completed = $service->listCompleted();
     <form class="add-form" method="POST">
         <input type="hidden" name="action" value="add">
         <input type="text" name="title" placeholder="Nowe zadanie…" autofocus required>
+        <select name="priority" class="priority-select" style="border:1.5px solid #d1d5db; padding:.65rem .7rem; font-size:.85rem">
+            <?php foreach (Priority::cases() as $p): ?>
+            <option value="<?= $p->value ?>" <?= $p === Priority::Medium ? 'selected' : '' ?>>
+                <?= $p->label() ?>
+            </option>
+            <?php endforeach; ?>
+        </select>
         <button class="btn btn-primary" type="submit">Dodaj</button>
     </form>
 
@@ -230,6 +265,20 @@ $completed = $service->listCompleted();
                                value="<?= htmlspecialchars($task->getTitle()) ?>"
                                onblur="this.form.requestSubmit()"
                                title="Kliknij, żeby zmienić nazwę">
+                    </form>
+                    <form method="POST">
+                        <input type="hidden" name="action" value="priority">
+                        <input type="hidden" name="id" value="<?= $task->getId() ?>">
+                        <select name="priority"
+                                class="priority-select priority-<?= $task->getPriority()->value ?>"
+                                onchange="this.form.submit()">
+                            <?php foreach (Priority::cases() as $p): ?>
+                            <option value="<?= $p->value ?>"
+                                <?= $p === $task->getPriority() ? 'selected' : '' ?>>
+                                <?= $p->label() ?>
+                            </option>
+                            <?php endforeach; ?>
+                        </select>
                     </form>
                     <div class="task-actions">
                         <form method="POST">

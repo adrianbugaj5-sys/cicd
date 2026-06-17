@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use App\Model\Priority;
 use App\Model\Task;
 use App\Repository\TaskRepositoryInterface;
 use RuntimeException;
@@ -14,9 +15,18 @@ class TaskService
     {
     }
 
-    public function createTask(string $title): Task
+    public function createTask(string $title, Priority $priority = Priority::Medium): Task
     {
-        $task = new Task($title);
+        $task = new Task($title, $priority);
+        $this->repository->save($task);
+
+        return $task;
+    }
+
+    public function changeTaskPriority(int $id, Priority $priority): Task
+    {
+        $task = $this->getOrFail($id);
+        $task->changePriority($priority);
         $this->repository->save($task);
 
         return $task;
