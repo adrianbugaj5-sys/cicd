@@ -42,7 +42,7 @@ class Task
 
     public function complete(): void
     {
-        $this->completed = true;
+        $this->completed = false;
     }
 
     public function rename(string $title): void
