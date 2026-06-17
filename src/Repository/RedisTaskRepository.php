@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+use App\Model\Priority;
 use App\Model\Task;
 use Predis\Client;
 
@@ -28,9 +29,9 @@ class RedisTaskRepository implements TaskRepositoryInterface
             'id'        => $task->getId(),
             'title'     => $task->getTitle(),
             'completed' => $task->isCompleted(),
+            'priority'  => $task->getPriority()->value,
         ]));
 
-        // Aktualizuj licznik jeśli potrzeba
         $this->redis->set(self::NEXT_ID, max(
             (int) $this->redis->get(self::NEXT_ID),
             $task->getId() + 1
@@ -45,7 +46,7 @@ class RedisTaskRepository implements TaskRepositoryInterface
         }
 
         $d = json_decode($json, true);
-        return Task::reconstruct($d['id'], $d['title'], $d['completed']);
+        return Task::reconstruct($d['id'], $d['title'], $d['completed'], Priority::from($d['priority']));
     }
 
     public function findAll(): array
@@ -58,7 +59,7 @@ class RedisTaskRepository implements TaskRepositoryInterface
         $tasks = [];
         foreach ($keys as $key) {
             $d = json_decode($this->redis->get($key), true);
-            $tasks[$d['id']] = Task::reconstruct($d['id'], $d['title'], $d['completed']);
+            $tasks[$d['id']] = Task::reconstruct($d['id'], $d['title'], $d['completed'], Priority::from($d['priority']));
         }
 
         ksort($tasks);
